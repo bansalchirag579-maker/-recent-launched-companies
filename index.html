@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RecentLaunchedCompanies.com - Vetted Insights & Genuine Analysis on Newly Launched Startups. Explore growth potentials, degradation risks, and area-wise startup databases.">
+  <title>Recent Launched Companies - Genuine Insights on New Startups</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="dark-theme">
+  <!-- Main Application Wrapper -->
+  <div id="app-container">
+    
+    <!-- Top Navigation Header -->
+    <header class="main-header">
+      <div class="header-logo-section">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>RecentLaunched<span>Companies</span></h1>
+          <span class="logo-domain">.com</span>
+        </div>
+      </div>
+
+      <!-- Trust Tagline -->
+      <div class="header-tagline">
+        <span class="shield-icon">🛡️</span>
+        <span class="tagline-text">Vetted Insights, Genuine Analysis & Best Hiring Opportunities on New Startups</span>
+      </div>
+
+      <!-- Live and Interactive Stats -->
+      <div class="header-actions">
+        <div class="sync-indicator" title="Database checks for new launches every 24 hours">
+          <span class="sync-icon">🔄</span>
+          <span class="sync-text" id="header-sync-time">Daily Sync: Today</span>
+        </div>
+        <div class="live-indicator">
+          <span class="pulse-dot"></span>
+          <span class="live-text">Live Ticker Active</span>
+        </div>
+        
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
+          <span class="dark-icon">🌙</span>
+          <span class="light-icon">☀️</span>
+        </button>
+
+        <div id="auth-status-container">
+          <button id="header-auth-btn" class="btn btn-outline">
+            <span class="btn-text">Sign In</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Banner Warning for Auth Timer -->
+    <div id="lock-warning-banner" class="warning-banner hidden">
+      <span class="warning-icon">🔑</span>
+      <span class="warning-msg">Unlock full unlimited access! Mandatory registration in <strong id="warning-timer">60</strong>s.</span>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="workspace-layout">
+      
+      <!-- Sidebar Filters -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3>Sectors</h3>
+          <div class="filter-group" id="sector-filters">
+            <button class="filter-chip active" data-filter="sector" data-value="all">All Sectors</button>
+            <button class="filter-chip" data-filter="sector" data-value="AI & Tech">AI & Tech</button>
+            <button class="filter-chip" data-filter="sector" data-value="SaaS">SaaS</button>
+            <button class="filter-chip" data-filter="sector" data-value="FinTech">FinTech</button>
+            <button class="filter-chip" data-filter="sector" data-value="HealthTech">HealthTech</button>
+            <button class="filter-chip" data-filter="sector" data-value="Green Energy">Green Energy</button>
+            <button class="filter-chip" data-filter="sector" data-value="E-Commerce">E-Commerce</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Growth Chance</h3>
+          <div class="filter-group" id="growth-filters">
+            <button class="filter-chip active" data-filter="growth" data-value="all">Any Growth</button>
+            <button class="filter-chip" data-filter="growth" data-value="high">High (> 80%)</button>
+            <button class="filter-chip" data-filter="growth" data-value="medium">Medium (50%-80%)</button>
+            <button class="filter-chip" data-filter="growth" data-value="low">Low (&lt; 50%)</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Degradation Risk</h3>
+          <div class="filter-group" id="risk-filters">
+            <button class="filter-chip active" data-filter="risk" data-value="all">Any Risk</button>
+            <button class="filter-chip" data-filter="risk" data-value="low">Low (&lt; 35%)</button>
+            <button class="filter-chip" data-filter="risk" data-value="medium">Medium (35%-65%)</button>
+            <button class="filter-chip" data-filter="risk" data-value="high">High (> 65%)</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
+            <h3 style="margin-bottom:0;">Hiring Status</h3>
+            <span class="info-tooltip" style="cursor:help; font-size:0.85rem; opacity:0.6;" title="Active hiring is a primary indicator of growth. It signals that a startup has secured capital, validates operational demand, and shows expansion velocity. Conversely, freezes can signal capital preservation.">ℹ️</span>
+          </div>
+          <div class="filter-group" id="hiring-filters">
+            <button class="filter-chip active" data-filter="hiring" data-value="all">Any Status</button>
+            <button class="filter-chip" data-filter="hiring" data-value="hiring">Currently Hiring 🔥</button>
+            <button class="filter-chip" data-filter="hiring" data-value="nothiring">Not Hiring</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Launch Timeframe</h3>
+          <div class="filter-group" id="timeframe-filters">
+            <button class="filter-chip active" data-filter="timeframe" data-value="all">Past 30 Days</button>
+            <button class="filter-chip" data-filter="timeframe" data-value="7">Past 7 Days</button>
+            <button class="filter-chip" data-filter="timeframe" data-value="14">Past 14 Days</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Popular Locations</h3>
+          <div class="location-quick-links" id="location-links">
+            <button class="loc-link" data-loc="Noida">Noida, India</button>
+            <button class="loc-link" data-loc="San Francisco">San Francisco, USA</button>
+            <button class="loc-link" data-loc="London">London, UK</button>
+            <button class="loc-link" data-loc="Bangalore">Bangalore, India</button>
+            <button class="loc-link" data-loc="Tokyo">Tokyo, Japan</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Dashboard Panel -->
+      <main class="dashboard-main">
+        <!-- Overview Dashboard Cards -->
+        <section class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon purple-glow">🚀</div>
+            <div class="stat-info">
+              <span class="stat-label">Total Startups Tracked</span>
+              <span class="stat-value" id="stat-total">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green-glow">📈</div>
+            <div class="stat-info">
+              <span class="stat-label">High Growth Potential</span>
+              <span class="stat-value" id="stat-high-growth">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red-glow">📉</div>
+            <div class="stat-info">
+              <span class="stat-label">Critical Decline Risk</span>
+              <span class="stat-value" id="stat-high-risk">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue-glow">💼</div>
+            <div class="stat-info">
+              <span class="stat-label">Actively Hiring</span>
+              <span class="stat-value" id="stat-hiring-now">0</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search and Sort Panel -->
+        <section class="controls-bar">
+          <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search by name, sector, or area (e.g. Noida)...">
+            <button id="search-clear-btn" class="hidden">✕</button>
+          </div>
+          
+          <div class="sort-selector-wrapper">
+            <label for="sort-select">Sort By:</label>
+            <select id="sort-select">
+              <option value="launchDateDesc">Newest Launches</option>
+              <option value="growthDesc">Highest Growth Potential</option>
+              <option value="growthAsc">Lowest Growth Potential</option>
+              <option value="riskDesc">Highest Decline Risk</option>
+              <option value="nameAsc">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Active Filter Tags Display -->
+        <div id="active-filters-row" class="active-filters-container hidden">
+          <span class="active-filters-label">Active Filters:</span>
+          <div id="active-filters-list"></div>
+          <button id="clear-all-filters" class="btn-text">Clear All</button>
+        </div>
+
+        <!-- Companies Grid / List -->
+        <section class="companies-section">
+          <div id="no-results" class="no-results-view hidden">
+            <div class="no-results-illustration">🔍</div>
+            <h3>No Startups Match Your Search</h3>
+            <p>Try clearing your filters or searching for another region like "Noida" or "San Francisco".</p>
+            <button id="reset-search-btn" class="btn btn-primary">Reset Search</button>
+          </div>
+
+          <div id="companies-grid" class="companies-grid">
+            <!-- Dynamic startup cards go here -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Company Detail Sidebar Drawer (Sliding from right) -->
+    <div id="detail-drawer" class="detail-drawer">
+      <div class="drawer-backdrop" id="drawer-backdrop"></div>
+      <div class="drawer-content">
+        <header class="drawer-header">
+          <div class="drawer-title-group">
+            <div class="drawer-logo-container" id="drawer-logo-placeholder"></div>
+            <div>
+              <h2 id="drawer-company-name">Startup Name</h2>
+              <div class="drawer-badges">
+                <span class="badge badge-sector" id="drawer-sector">Sector</span>
+                <span class="badge badge-location" id="drawer-location">Location</span>
+              </div>
+            </div>
+          </div>
+          <button class="close-drawer-btn" id="close-drawer-btn" aria-label="Close details">✕</button>
+        </header>
+
+        <div class="drawer-body">
+          <!-- Score Summary Visualizer -->
+          <div class="score-summary-card">
+            <div class="score-bar-group">
+              <div class="score-heading">
+                <span>Growth Opportunity</span>
+                <span id="drawer-growth-score-val" class="text-green font-bold">0%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill progress-green" id="drawer-growth-bar" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div class="score-bar-group">
+              <div class="score-heading">
+                <span>Degradation Risk</span>
+                <span id="drawer-risk-score-val" class="text-red font-bold">0%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill progress-red" id="drawer-risk-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs Navigator -->
+          <div class="drawer-tabs">
+            <button class="drawer-tab active" data-tab="overview">Overview</button>
+            <button class="drawer-tab" data-tab="growth">Why It Can Grow</button>
+            <button class="drawer-tab" data-tab="degrade">Why It Can Degrade</button>
+            <button class="drawer-tab" data-tab="careers">Careers (Hiring) 💼</button>
+          </div>
+
+          <!-- Tab Content Views -->
+          <div class="tab-contents">
+            <!-- Tab: Overview -->
+            <div class="tab-pane active" id="pane-overview">
+              <div class="summary-section">
+                <h4>About the Startup</h4>
+                <p id="drawer-description">Startup description placeholder text.</p>
+              </div>
+              
+              <div class="meta-grid">
+                <div class="meta-item">
+                  <span class="meta-label">Launch Date</span>
+                  <span class="meta-value" id="drawer-launch-date">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Estimated Funding</span>
+                  <span class="meta-value" id="drawer-funding">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Team Size</span>
+                  <span class="meta-value" id="drawer-team-size">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Hiring Status</span>
+                  <span class="meta-value" id="drawer-hiring-status">-</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Trust Index</span>
+                  <span class="meta-value text-green" id="drawer-trust-index">Genuine ✓</span>
+                </div>
+              </div>
+
+              <!-- Metric Visual Comparison Chart -->
+              <div class="chart-container">
+                <h4>Growth vs. Risk Ratio</h4>
+                <div class="svg-chart-wrapper" id="drawer-chart-svg">
+                  <!-- Generated SVG goes here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Growth Drivers -->
+            <div class="tab-pane" id="pane-growth">
+              <div class="factors-list" id="drawer-growth-factors">
+                <!-- Dynamic growth bullet items -->
+              </div>
+            </div>
+
+            <!-- Tab: Degradation Risk -->
+            <div class="tab-pane" id="pane-degrade">
+              <div class="factors-list" id="drawer-risk-factors">
+                <!-- Dynamic risk bullet items -->
+              </div>
+            </div>
+
+            <!-- Tab: Careers -->
+            <div class="tab-pane" id="pane-careers">
+              <div class="careers-section">
+                <div id="drawer-careers-hiring-state">
+                  <h4 style="margin-bottom:0.75rem;">Open Positions</h4>
+                  <div class="jobs-list" id="drawer-jobs-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+                    <!-- Dynamic open roles list -->
+                  </div>
+                </div>
+                <div id="drawer-careers-empty-state" class="hidden text-center py-4">
+                  <div class="no-results-illustration" style="font-size: 2rem; text-align:center; margin-bottom: 0.5rem;">💼</div>
+                  <h4 style="margin-top:0.5rem; text-align:center;">No Active Openings</h4>
+                  <p class="text-muted" style="font-size:0.82rem; text-align:center;">This startup is not actively hiring right now. Check back later or view their official site for future openings.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="drawer-footer">
+          <button class="btn btn-primary btn-full" id="drawer-website-btn">Visit Website</button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- 1-Minute Forced Signup/Login Modal Lock -->
+  <div id="auth-modal" class="auth-modal hidden">
+    <div class="auth-modal-glass">
+      
+      <!-- Welcome Details and Left Info Column -->
+      <div class="auth-modal-left">
+        <div class="auth-brand">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h2>RecentLaunchedCompanies<span>.com</span></h2>
+        </div>
+        
+        <ul class="auth-benefit-list">
+          <li>
+            <span class="icon">✨</span>
+            <div>
+              <strong>Unrestricted Search</strong>
+              <p>Search all startups by city (e.g. Noida, SF) and sector.</p>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🛡️</span>
+            <div>
+              <strong>Genuine Vetted Reports</strong>
+              <p>Get data validated by market experts with 0% bias.</p>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🔔</span>
+            <div>
+              <strong>Real-Time Alerts</strong>
+              <p>Be the first to know when high-potential startups launch.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="auth-footer-text">
+          <span>Locked out? Register now to claim your free access forever.</span>
+        </div>
+      </div>
+
+      <!-- Forms Right Column -->
+      <div class="auth-modal-right">
+        
+        <!-- Signup Form View -->
+        <div id="signup-form-container" class="auth-form-container active">
+          <div class="form-header">
+            <h3>Create Your Account</h3>
+            <p>Get instant access to genuine startup reports.</p>
+          </div>
+          
+          <form id="signup-form">
+            <div class="form-row">
+              <label for="signup-name">Full Name</label>
+              <input type="text" id="signup-name" placeholder="John Doe" required autocomplete="name">
+            </div>
+            <div class="form-row">
+              <label for="signup-email">Email Address</label>
+              <input type="email" id="signup-email" placeholder="john@example.com" required autocomplete="email">
+            </div>
+            <div class="form-row">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+            </div>
+            <div class="form-checkbox">
+              <input type="checkbox" id="signup-terms" required>
+              <label for="signup-terms">I agree to the Terms of Service & Privacy Policy</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-glow">Create Account</button>
+          </form>
+          
+          <div class="form-toggle-link">
+            Already have an account? <button id="to-login-btn">Log In</button>
+          </div>
+        </div>
+
+        <!-- Login Form View -->
+        <div id="login-form-container" class="auth-form-container">
+          <div class="form-header">
+            <h3>Welcome Back</h3>
+            <p>Log in to view recent global startup analyses.</p>
+          </div>
+          
+          <form id="login-form">
+            <div class="form-row">
+              <label for="login-email">Email Address</label>
+              <input type="email" id="login-email" placeholder="john@example.com" required autocomplete="email">
+            </div>
+            <div class="form-row">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <div class="form-checkbox">
+              <input type="checkbox" id="login-remember">
+              <label for="login-remember">Remember my session</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-glow">Sign In</button>
+          </form>
+          
+          <div class="form-toggle-link">
+            Don't have an account yet? <button id="to-signup-btn">Sign Up</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Javascript Logic -->
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
