@@ -596,7 +596,17 @@ const elements = {
   headerAuthBtn: document.getElementById("header-auth-btn"),
   headerSyncTime: document.getElementById("header-sync-time"),
   themeToggle: document.getElementById("theme-toggle"),
-  toastContainer: document.getElementById("toast-container")
+  toastContainer: document.getElementById("toast-container"),
+
+  // Policy Modals & Links
+  linkAbout: document.getElementById("link-about"),
+  linkContact: document.getElementById("link-contact"),
+  linkPrivacy: document.getElementById("link-privacy"),
+  linkTerms: document.getElementById("link-terms"),
+  policyModal: document.getElementById("policy-modal"),
+  policyModalTitle: document.getElementById("policy-modal-title"),
+  policyModalBody: document.getElementById("policy-modal-body"),
+  closePolicyBtn: document.getElementById("close-policy-btn")
 };
 
 // ----------------------------------------------------
@@ -1386,6 +1396,77 @@ function initializeApp() {
         window.open(url, "_blank");
       }, 500);
     }
+  });
+
+  // L. Policy Modal Handlers (Essential for AdSense policy compliance)
+  const policies = {
+    about: {
+      title: "About Us",
+      content: `
+        <p><strong>RecentLaunchedCompanies.com</strong> is a premier independent analytics platform dedicated to vetting and analyzing newly launched startups around the globe.</p>
+        <p style="margin-top:0.75rem;">Our team of tech analysts, journalists, and market researchers evaluates early-stage ventures launched within the past 1 month. We track their operations, hiring activity, funding rounds, and target regional markets (including tech hubs like Noida in India, San Francisco in the USA, and London in the UK).</p>
+        <p style="margin-top:0.75rem;">Through detailed metrics analyzing Growth Potential and Decline Risk ratios, we aim to provide the most genuine, transparent, and vetted insights for investors, job seekers, and partners looking to connect with tomorrow's market leaders today.</p>
+      `
+    },
+    contact: {
+      title: "Contact Us",
+      content: `
+        <p>If you have any questions, feedback, or inquiries regarding our vetting process, featured startups, or advertising, please reach out to our team:</p>
+        <div style="margin-top: 1rem; background: var(--bg-input); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+          <p><strong>📧 Email:</strong> support@recentlaunchedcompanies.com</p>
+          <p style="margin-top: 0.5rem;"><strong>🏢 Address:</strong> Sector 62, Noida, Uttar Pradesh, 201301, India</p>
+        </div>
+        <p style="margin-top: 1rem;">We make every effort to respond to all genuine inquiries within 24 to 48 business hours.</p>
+      `
+    },
+    privacy: {
+      title: "Privacy Policy",
+      content: `
+        <p>At RecentLaunchedCompanies.com, accessible from recentlaunchedcompanies.com, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by RecentLaunchedCompanies.com and how we use it.</p>
+        <h4 style="margin-top:1rem; font-weight:700; color:var(--text-main);">Log Files</h4>
+        <p>RecentLaunchedCompanies.com follows a standard procedure of using log files. These files log visitors when they visit websites. All hosting companies do this and a part of hosting services' analytics. The information collected by log files includes internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks.</p>
+        <h4 style="margin-top:1rem; font-weight:700; color:var(--text-main);">Google DoubleClick DART Cookie</h4>
+        <p>Google is one of a third-party vendor on our site. It also uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to www.website.com and other sites on the internet. However, visitors may choose to decline the use of DART cookies by visiting the Google ad and content network Privacy Policy.</p>
+        <h4 style="margin-top:1rem; font-weight:700; color:var(--text-main);">Our Advertising Partners</h4>
+        <p>Some of advertisers on our site may use cookies and web beacons. Our advertising partners include Google AdSense. Each of our advertising partners has their own Privacy Policy for their policies on user data.</p>
+      `
+    },
+    terms: {
+      title: "Terms of Service",
+      content: `
+        <p>Welcome to RecentLaunchedCompanies.com!</p>
+        <p style="margin-top:0.75rem;">These terms and conditions outline the rules and regulations for the use of RecentLaunchedCompanies.com's Website, located at recentlaunchedcompanies.com.</p>
+        <p style="margin-top:0.75rem;">By accessing this website we assume you accept these terms and conditions. Do not continue to use RecentLaunchedCompanies.com if you do not agree to take all of the terms and conditions stated on this page.</p>
+        <h4 style="margin-top:1rem; font-weight:700; color:var(--text-main);">License</h4>
+        <p>Unless otherwise stated, RecentLaunchedCompanies.com and/or its licensors own the intellectual property rights for all material on RecentLaunchedCompanies.com. All intellectual property rights are reserved. You may access this from RecentLaunchedCompanies.com for your own personal use subjected to restrictions set in these terms and conditions.</p>
+        <h4 style="margin-top:1rem; font-weight:700; color:var(--text-main);">Disclaimer</h4>
+        <p>To the maximum extent permitted by applicable law, we exclude all representations, warranties, and conditions relating to our website and the use of this website. Nothing in this disclaimer will limit or exclude our or your liability for death or personal injury resulting from negligence, or limit or exclude liability for fraud or fraudulent misrepresentation.</p>
+      `
+    }
+  };
+
+  const openPolicy = (key) => {
+    const policy = policies[key];
+    if (!policy) return;
+    elements.policyModalTitle.textContent = policy.title;
+    elements.policyModalBody.innerHTML = policy.content;
+    elements.policyModal.classList.remove("hidden");
+  };
+
+  const closePolicy = () => {
+    elements.policyModal.classList.add("hidden");
+  };
+
+  // Bind footer links
+  elements.linkAbout.addEventListener("click", (e) => { e.preventDefault(); openPolicy("about"); });
+  elements.linkContact.addEventListener("click", (e) => { e.preventDefault(); openPolicy("contact"); });
+  elements.linkPrivacy.addEventListener("click", (e) => { e.preventDefault(); openPolicy("privacy"); });
+  elements.linkTerms.addEventListener("click", (e) => { e.preventDefault(); openPolicy("terms"); });
+
+  // Close policy modal
+  elements.closePolicyBtn.addEventListener("click", closePolicy);
+  elements.policyModal.addEventListener("click", (e) => {
+    if (e.target === elements.policyModal) closePolicy();
   });
 }
 
