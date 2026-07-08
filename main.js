@@ -1,4 +1,21 @@
-// Main application logic for recentlaunchedcompanies.com
+import { supabase } from './supabase.js';
+
+// Initialize Google Analytics if ID is provided
+const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+if (gaId) {
+  const scriptEl = document.createElement('script');
+  scriptEl.async = true;
+  scriptEl.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+  document.head.appendChild(scriptEl);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', gaId);
+}
+
+const isSupabaseActive = () => supabase !== null;
 
 // Helper to dynamically calculate mock launch dates relative to today (guaranteeing past 1 month startups)
 const daysAgo = (num) => {
@@ -1036,32 +1053,45 @@ function renderSVGComparisonChart(growth, risk) {
 let countdownValue = 60; // 1 minute in seconds
 let countdownTimerId = null;
 
+let currentUser = null;
+
 function checkAuthStatus() {
-  const user = localStorage.getItem("userSession");
-  if (user) {
-    // User is logged in
-    const session = JSON.parse(user);
+  if (currentUser) {
     elements.lockWarningBanner.classList.add("hidden");
     elements.authModal.classList.add("hidden");
     elements.appContainer.classList.remove("locked");
     
-    // Update Header button
+    elements.headerAuthBtn.classList.remove("btn-outline");
+    elements.headerAuthBtn.classList.add("btn-primary");
+    elements.headerAuthBtn.innerHTML = `<span>👋</span> <span class="btn-text">Log Out (${currentUser.name.split(' ')[0]})</span>`;
+    return true;
+  }
+  
+  // Local storage fallback for offline/guest state
+  const user = localStorage.getItem("userSession");
+  if (user) {
+    const session = JSON.parse(user);
+    currentUser = session;
+    elements.lockWarningBanner.classList.add("hidden");
+    elements.authModal.classList.add("hidden");
+    elements.appContainer.classList.remove("locked");
+    
     elements.headerAuthBtn.classList.remove("btn-outline");
     elements.headerAuthBtn.classList.add("btn-primary");
     elements.headerAuthBtn.innerHTML = `<span>👋</span> <span class="btn-text">Log Out (${session.name.split(' ')[0]})</span>`;
     return true;
-  } else {
-    // User is guest
-    elements.headerAuthBtn.classList.add("btn-outline");
-    elements.headerAuthBtn.classList.remove("btn-primary");
-    elements.headerAuthBtn.innerHTML = `<span class="btn-text">Sign In</span>`;
-    return false;
   }
+  
+  elements.headerAuthBtn.classList.add("btn-outline");
+  elements.headerAuthBtn.classList.remove("btn-primary");
+  elements.headerAuthBtn.innerHTML = `<span class="btn-text">Sign In</span>`;
+  return false;
 }
 
 // Starts the ticking timer for mandatory registration
 function startAuthenticationCountdown() {
   if (checkAuthStatus()) return; // Already logged in, no timer needed
+  if (countdownTimerId !== null) return; // Timer is already running
   
   elements.lockWarningBanner.classList.remove("hidden");
   elements.warningTimer.textContent = countdownValue;
@@ -1103,63 +1133,149 @@ function triggerForcedAuthLock() {
   showToast("Access Locked", "Please register or sign in to continue viewing detailed analysis on recently launched companies.", "toast-warning", "🔑");
 }
 
-// Handle local registration mock flow
-function handleSignUp(e) {
+// Handle local registration mock flow or real Supabase flow
+async function handleSignUp(e) {
   e.preventDefault();
   
   const name = document.getElementById("signup-name").value;
   const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
   
-  if (!name || !email) return;
+  if (!name || !email || !password) return;
+
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  const originalBtnText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Creating Account...";
   
-  // Save fake session details
-  const session = { name, email, isLoggedIn: true, token: "mock-jwt-" + Date.now() };
-  localStorage.setItem("userSession", JSON.stringify(session));
-  
-  // Clear modal and timer
-  clearInterval(countdownTimerId);
-  elements.authModal.classList.add("hidden");
-  elements.appContainer.classList.remove("locked");
-  elements.lockWarningBanner.classList.add("hidden");
-  
-  // Update UI headers
-  checkAuthStatus();
-  
-  showToast("Account Created!", `Welcome to RecentLaunchedCompanies, ${name.split(' ')[0]}! Full access unlocked.`, "toast-new-company", "🛡️");
+  if (isSupabaseActive()) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name
+          }
+        }
+      });
+      if (error) throw error;
+      
+      // Check if session was generated (some setups auto-login upon signup)
+      if (data.session) {
+        showToast("Account Created!", `Welcome to RecentLaunchedCompanies, ${name.split(' ')[0]}! Full access unlocked.`, "toast-new-company", "🛡️");
+      } else {
+        // If email confirmation is required (default Supabase setting)
+        showToast("Check your Email!", "We sent a verification link. Please confirm your email to activate your account.", "toast-new-company", "📧");
+        
+        // Temporarily let them browse for friction-free UX
+        const session = { name, email, isLoggedIn: true, token: "temp-jwt-" + Date.now() };
+        localStorage.setItem("userSession", JSON.stringify(session));
+        currentUser = session;
+        
+        clearInterval(countdownTimerId);
+        elements.authModal.classList.add("hidden");
+        elements.appContainer.classList.remove("locked");
+        elements.lockWarningBanner.classList.add("hidden");
+        checkAuthStatus();
+      }
+    } catch (err) {
+      console.error("Supabase signup error:", err.message);
+      showToast("Sign Up Failed", err.message, "toast-warning", "❌");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
+    }
+  } else {
+    // Fallback Mock Sign Up
+    const session = { name, email, isLoggedIn: true, token: "mock-jwt-" + Date.now() };
+    localStorage.setItem("userSession", JSON.stringify(session));
+    currentUser = session;
+    
+    clearInterval(countdownTimerId);
+    elements.authModal.classList.add("hidden");
+    elements.appContainer.classList.remove("locked");
+    elements.lockWarningBanner.classList.add("hidden");
+    
+    checkAuthStatus();
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalBtnText;
+    
+    showToast("Account Created (Offline)!", `Welcome, ${name.split(' ')[0]}! Full access unlocked.`, "toast-new-company", "🛡️");
+  }
 }
 
-function handleLogIn(e) {
+async function handleLogIn(e) {
   e.preventDefault();
   
   const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
   
-  if (!email) return;
+  if (!email || !password) return;
+
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  const originalBtnText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Signing In...";
   
-  const name = email.split('@')[0]; // simple name generation from email
-  const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-  
-  const session = { name: formattedName, email, isLoggedIn: true, token: "mock-jwt-" + Date.now() };
-  localStorage.setItem("userSession", JSON.stringify(session));
-  
-  clearInterval(countdownTimerId);
-  elements.authModal.classList.add("hidden");
-  elements.appContainer.classList.remove("locked");
-  elements.lockWarningBanner.classList.add("hidden");
-  
-  checkAuthStatus();
-  
-  showToast("Logged In", `Welcome back, ${formattedName}! Unrestricted access restored.`, "toast-new-company", "🔓");
+  if (isSupabaseActive()) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      if (error) throw error;
+      
+      const name = data.user.user_metadata.full_name || email.split('@')[0];
+      const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+      
+      showToast("Logged In", `Welcome back, ${formattedName}! Unrestricted access restored.`, "toast-new-company", "🔓");
+    } catch (err) {
+      console.error("Supabase login error:", err.message);
+      showToast("Login Failed", err.message, "toast-warning", "❌");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
+    }
+  } else {
+    // Fallback Mock Log In
+    const name = email.split('@')[0];
+    const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+    
+    const session = { name: formattedName, email, isLoggedIn: true, token: "mock-jwt-" + Date.now() };
+    localStorage.setItem("userSession", JSON.stringify(session));
+    currentUser = session;
+    
+    clearInterval(countdownTimerId);
+    elements.authModal.classList.add("hidden");
+    elements.appContainer.classList.remove("locked");
+    elements.lockWarningBanner.classList.add("hidden");
+    
+    checkAuthStatus();
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalBtnText;
+    
+    showToast("Logged In (Offline)", `Welcome back, ${formattedName}! Unrestricted access restored.`, "toast-new-company", "🔓");
+  }
 }
 
-function handleLogout() {
+async function handleLogout() {
+  if (isSupabaseActive()) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (err) {
+      console.error("Supabase logout error:", err.message);
+    }
+  }
+
   localStorage.removeItem("userSession");
+  currentUser = null;
   
-  // Refresh layout state
   checkAuthStatus();
-  
   showToast("Signed Out", "You have logged out. The session is closed.", "toast-warning", "🔒");
   
-  // Restart timer from fresh
+  // Restart timer
   countdownValue = 60;
   elements.lockWarningBanner.style.background = "linear-gradient(90deg, #d97706, #f59e0b)";
   elements.lockWarningBanner.style.color = "#000";
@@ -1246,6 +1362,37 @@ function formatDateLabel(dateString) {
 // ----------------------------------------------------
 function initializeApp() {
   
+  // Subscribe to auth state changes if Supabase is active
+  if (isSupabaseActive()) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        currentUser = {
+          name: session.user.user_metadata.full_name || session.user.email.split('@')[0],
+          email: session.user.email,
+          isLoggedIn: true
+        };
+        clearInterval(countdownTimerId);
+        elements.lockWarningBanner.classList.add("hidden");
+        elements.authModal.classList.add("hidden");
+        elements.appContainer.classList.remove("locked");
+        
+        elements.headerAuthBtn.classList.remove("btn-outline");
+        elements.headerAuthBtn.classList.add("btn-primary");
+        elements.headerAuthBtn.innerHTML = `<span>👋</span> <span class="btn-text">Log Out (${currentUser.name.split(' ')[0]})</span>`;
+      } else {
+        currentUser = null;
+        elements.headerAuthBtn.classList.add("btn-outline");
+        elements.headerAuthBtn.classList.remove("btn-primary");
+        elements.headerAuthBtn.innerHTML = `<span class="btn-text">Sign In</span>`;
+        
+        // If logged out, start countdown
+        if (countdownTimerId === null) {
+          startAuthenticationCountdown();
+        }
+      }
+    });
+  }
+
   // Set dynamic Sync time in header (simulate daily sync updates)
   if (elements.headerSyncTime) {
     const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
